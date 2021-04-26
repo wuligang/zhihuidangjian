@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataActivityMapper">
+<select id="getTop" resultType="java.util.Map">
+    select id,name,create_time ,category_id from data_activity where active_status=2 ORDER BY holding_start_time desc
+    limit #{start},
+    #{end};
+</select>
+
+    <select id="pageList" resultType="org.jeecg.modules.party_building.vo.DataActivityVo">
+        select  a.*,d.depart_Name hostDepartName  from data_activity a
+                                left join sys_depart d
+                                on a.host_Depart_Id=d.id
+        <where>
+            <if test="dataActivity.id!=null">
+               a.id=#{dataActivity.id}
+            </if>
+            <if test="shenpihuodong!=null">
+                and a.active_Status !=#{shenpihuodong}
+            </if>
+            <if test="bohui!=null">
+                and a.active_Status !=#{bohui}
+            </if>
+            <if test="dataActivity.name!=null">
+              and  a.name like concat('%',#{dataActivity.name},'%')
+            </if>
+            <if test="dataActivity.activeStatus!=null">
+             and a.active_Status=#{dataActivity.activeStatus}
+            </if>
+            <if test="dataActivity.categoryId!=null">
+                and  a.category_Id=#{dataActivity.categoryId}
+            </if>
+            <if test='time=="1"'>
+                now() > a.holding_end_time
+            </if>
+            <if test='time=="2"'>
+              and  now()>=a.sign_Up_Start_Time   AND a.sign_up_end_time >=now()
+            </if>
+            <if test='time=="3"'>
+                <if test="userid==null">
+                    and now()>= a.holding_Start_Time and a.holding_End_Time>=now()
+                </if>
+                <if test="userid!=null and userid!=''">
+                    and now()>= a.holding_Start_Time and a.holding_End_Time>=now() and a.partyMember like CONCAT('%',#{userid},'%')
+                </if>
+            </if>
+        </where>
+            order by a.sign_Up_Start_Time desc
+    </select>
+<!--审核-->
+    <update id="updateIds" >
+        update data_activity set active_Status=#{activeStatus} where  id=#{id}
+    </update>
+
+    <!--小程序详情-->
+    <select id="xiangqing" resultType="org.jeecg.modules.party_building.vo.DataActivityVo">
+select  a.*,asv.sign_Time signTime,das.activitysign_Up_Status,das.id  activitysignUpId from data_activity a
+                         left join  data_activity_signUp das
+                         on a.id=das.activity_Id
+                         left join data_activity_sign asv
+                            on das.id=asv.actity_Sign_Up_Id
+          <where>
+              <if test="dataActivity.id!=null">
+                  a.id=#{dataActivity.id}
+              </if>
+              <if test="dataActivity.orgCode!=null">
+                  and das.user_Id=#{userid}
+              </if>
+          </where>
+    </select>
+</mapper>

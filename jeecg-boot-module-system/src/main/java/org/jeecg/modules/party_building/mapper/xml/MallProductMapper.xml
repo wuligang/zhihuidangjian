@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.MallProductMapper">
+
+    <select id="getValidProdById" resultType="org.jeecg.modules.party_building.entity.MallProduct">
+		SELECT id, pro_no as proNo, pro_title as proTitle, file_id as fileId, pro_content as proContent,
+		 pro_integral as proIntegral, exchange_explain as exchangeExplain, stock,status,is_delete as isDelete
+		 from mall_product where id = #{id} and status = '1' and is_delete != '1'
+	</select>
+
+</mapper>

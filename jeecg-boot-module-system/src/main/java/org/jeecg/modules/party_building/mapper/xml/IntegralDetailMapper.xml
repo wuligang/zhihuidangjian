@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.IntegralDetailMapper">
+
+    <select id="haveRecordToday" resultType="java.lang.Integer">
+		SELECT count(1) FROM `integral_detail` t
+		where
+		t.user_id = #{userId}
+		and t.rule_no= #{ruleNo}
+		and DATE_FORMAT(t.change_time,'%Y%m%d') = DATE_FORMAT(now(),'%Y%m%d')
+		<if test="videoName != null and videoName != ''">
+			and t.video_name = #{videoName}
+		</if>
+	</select>
+
+
+	<select id="sumIntegralToday" resultType="java.lang.Integer">
+		SELECT IFNULL(sum(t.change_value), 0) FROM `integral_detail` t
+		where
+		t.user_id = #{userId}
+		and t.rule_no= #{ruleNo}
+		and DATE_FORMAT(t.change_time,'%Y%m%d') = DATE_FORMAT(now(),'%Y%m%d')
+	</select>
+
+	<select id="dailyUserIntegralGroupRuleNo" resultType="org.jeecg.modules.party_building.model.DailyUserIntegralModel">
+		SELECT
+			SUM( change_value ) as dayCurrIntegral,
+			t1.user_id as userId,
+			t1.rule_no as ruleNo,
+			t2.section as section,
+			t2.daily_limit as dailyLimit
+		FROM
+			integral_detail t1,
+			integral_rule t2
+		WHERE
+			t2.rule_no = t1.rule_no
+			AND t1.user_id = #{userId}
+			AND DATE_FORMAT( t1.change_time, '%Y%m%d' ) = IFNULL(#{date}, DATE_FORMAT(now(), '%Y%m%d' ))
+			AND t1.rule_no != 'R998'
+			AND t1.rule_no != 'R999'
+		GROUP BY
+			t1.rule_no;
+	</select>
+
+	<select id="queryUserIntegralGroupDate" resultType="org.jeecg.modules.party_building.model.UserIntegralDate">
+		SELECT
+			SUM(change_value) as dailySum,
+			DATE_FORMAT( t.change_time, '%Y-%m-%d' ) as date,
+			t.user_id as userId
+		FROM
+			integral_detail t
+		WHERE
+			user_id = #{userId}
+		GROUP BY
+			DATE_FORMAT( change_time, '%Y%m%d' )
+		ORDER BY
+			t.change_time DESC
+	</select>
+
+	<select id="integralRankByDate" resultType="org.jeecg.modules.party_building.model.IntegralDetailRank">
+	SELECT
+	*
+	FROM
+	(
+	SELECT
+	a.*,
+	( @rowNum := @rowNum + 1 ) AS rank
+	FROM
+	(
+	SELECT
+	t1.user_id AS userId,
+	t2.username AS userName,
+	t2.realname AS realName,
+	t2.avatar AS avatar,
+	<if test="integralDetailRank.startDate!=null and integralDetailRank.startDate!=''">
+		#{integralDetailRank.startDate} AS startDate,
+	</if>
+	<if test="integralDetailRank.endDate!=null and integralDetailRank.endDate!=''">
+		#{integralDetailRank.endDate} AS endDate,
+	</if>
+	if(sum( t1.change_value )>0, sum(t1.change_value), 0) AS integralSum
+	FROM
+	integral_detail t1,
+	sys_user t2
+	WHERE
+	t1.user_id = t2.id
+	AND t1.rule_no != 'R998'
+	<if test="integralDetailRank.startDate!=null and integralDetailRank.startDate!=''">
+		AND DATE_FORMAT( t1.change_time, '%Y%m%d' )<![CDATA[>=]]> #{integralDetailRank.startDate}
+	</if>
+	<if test="integralDetailRank.endDate!=null and integralDetailRank.endDate!=''">
+		AND DATE_FORMAT( t1.change_time, '%Y%m%d' )<![CDATA[<=]]> #{integralDetailRank.endDate}
+	</if>
+	GROUP BY
+	t1.user_id
+	) a,
+	(
+	SELECT
+	( @rowNum := 0 )) b
+	ORDER BY
+	a.integralSum DESC
+	) c
+	<where>
+		<if test="integralDetailRank.userId!=null and integralDetailRank.userId!=''">
+			c.userId = #{integralDetailRank.userId}
+		</if>
+	</where>
+</select>
+
+	<select id="yearIntegral" resultType="org.jeecg.modules.party_building.model.UserIntegralDate">
+		SELECT
+			if(SUM( t.change_value )>0,SUM( t.change_value ),0) AS dailySum,
+			DATE_FORMAT( change_time, '%Y%m' ) AS date,
+			t.user_id AS userId
+		FROM
+			integral_detail t
+		WHERE
+			DATE_FORMAT( NOW(), '%Y' )= DATE_FORMAT( change_time, '%Y' )
+			<if test="userId!=null and userId !=''">
+				AND t.user_id = #{userId}
+			</if>
+			AND t.rule_no != 'R998'
+		GROUP BY
+			DATE_FORMAT(
+				change_time,
+			'%Y%m'
+			)
+		ORDER BY
+			t.change_time
+	</select>
+
+	<select id="integralRankDepartByDate" resultType="org.jeecg.modules.party_building.model.IntegralDetailRank">
+		SELECT
+		d.depart_name AS orgCode,
+		sum(a.change_value) totalinergral,
+		<if test="integralDetailRank.startDate!=null and integralDetailRank.startDate!=''">
+			#{integralDetailRank.startDate} AS startDate,
+		</if>
+		<if test="integralDetailRank.endDate!=null and integralDetailRank.endDate!=''">
+			#{integralDetailRank.endDate} AS endDate,
+		</if>
+		if(sum( a.change_value )>0, sum(a.change_value), 0) AS integralSum
+		FROM
+		integral_detail a
+		INNER JOIN sys_user b ON a.user_id = b.id
+		INNER JOIN sys_user_depart c ON b.id = c.user_id
+		INNER JOIN sys_depart d ON c.dep_id = d.id
+		WHERE
+		a.rule_no != 'R998'
+		<if test="integralDetailRank.startDate!=null and integralDetailRank.startDate!=''">
+			AND DATE_FORMAT( a.change_time, '%Y%m%d' )<![CDATA[>=]]> #{integralDetailRank.startDate}
+		</if>
+		<if test="integralDetailRank.endDate!=null and integralDetailRank.endDate!=''">
+			AND DATE_FORMAT( a.change_time, '%Y%m%d' )<![CDATA[<=]]> #{integralDetailRank.endDate}
+		</if>
+		GROUP BY
+		d.depart_name
+		ORDER BY
+		totalinergral desc
+	</select>
+
+</mapper>

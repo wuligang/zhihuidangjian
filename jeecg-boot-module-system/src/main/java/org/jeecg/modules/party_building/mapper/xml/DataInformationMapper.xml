@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataInformationMapper">
+    <resultMap id="resultDataInformationVo" type="org.jeecg.modules.party_building.vo.DataInformationVo">
+
+    </resultMap>
+    <select id="queryCleanByCategoryId" resultType="java.util.Map">
+        SELECT * from data_information where category_id=#{categoryId} and status=#{articleStates} order by create_time DESC
+        <if test="isLimit">
+            limit 0,1;
+        </if>
+    </select>
+
+    <select id="listByCategoryId" resultType="java.util.Map">
+        SELECT id,title,content_type contentType,url from data_information where category_id=#{categoryId} and
+        status=#{articleStates}
+        order by create_time desc
+        limit #{start},#{size}
+    </select>
+    <select id="selectPageVo" resultMap="resultDataInformationVo">
+        select di.*,dc.name categoryName  from data_information di left join data_category dc on di.category_id=dc.id
+        where 1=1
+
+        <if test="!ew.EmptyOfWhere">
+            and
+        </if>
+        ${ew.sqlSegment}
+    </select>
+
+    <select id="selectInformationAndImagelist" resultType="java.util.Map">
+        select di.*,ossf.url imgUrl ,ossf1.url vedioUrl from data_information  di LEFT JOIN oss_file ossf on di.file_image_id=ossf.id LEFT JOIN oss_file ossf1 on di.file_video_id=ossf1.id
+        <where>
+            (di.is_delete=0 or di.is_delete is NULL)
+            <if test="dataInformation.status!=null and dataInformation.status!='' ">
+                and di.status=#{dataInformation.status}
+            </if>
+            <if test="dataInformation.module!=null and dataInformation.module!=''">
+                and di.module=#{dataInformation.module}
+            </if>
+            <if test="dataInformation.id!=null and dataInformation.id!=''">
+                and di.id=#{dataInformation.id}
+            </if>
+            <if test="dataInformation.categoryId!=null and dataInformation.categoryId!=''">
+                and di.category_id=#{dataInformation.categoryId}
+            </if>
+            <if test="dataInformation.contentType!=null and dataInformation.contentType!=''">
+                and di.content_type=#{dataInformation.contentType}
+            </if>
+            <if test="queryCondition!=null and queryCondition!=''">
+                and (di.title like CONCAT(CONCAT('%', #{queryCondition}), '%') or di.content like CONCAT(CONCAT('%',
+                #{queryCondition}), '%'))
+            </if>
+        </where>
+        ORDER BY di.create_time DESC
+        limit #{start},#{size}
+    </select>
+
+    <select id="countinformationAndImagelist" resultType="java.lang.Integer">
+        select count(1) from data_information  di LEFT JOIN oss_file ossf on di.file_image_id=ossf.id LEFT JOIN oss_file ossf1 on
+        di.file_video_id=ossf1.id
+        <where>
+            (di.is_delete=0 or di.is_delete is NULL)
+            <if test="dataInformation.status!=null and dataInformation.status!='' ">
+                and di.status=#{dataInformation.status}
+            </if>
+            <if test="dataInformation.module!=null and dataInformation.module!=''">
+                and di.module=#{dataInformation.module}
+            </if>
+            <if test="dataInformation.id!=null and dataInformation.id!=''">
+                and di.id=#{dataInformation.id}
+            </if>
+            <if test="dataInformation.categoryId!=null and dataInformation.categoryId!=''">
+                and di.category_id=#{dataInformation.categoryId}
+            </if>
+            <if test="dataInformation.contentType!=null and dataInformation.contentType!=''">
+                and di.content_type=#{dataInformation.contentType}
+            </if>
+            <if test="queryCondition!=null and queryCondition!=''">
+                and (di.title like CONCAT(CONCAT('%', #{queryCondition}), '%') or di.content like CONCAT(CONCAT('%',
+                #{queryCondition}), '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="listRotationChartByMap" resultType="java.util.Map">
+        select dif.id,dif.title,dif.file_image_id,ossf.url imgUrl from data_information dif,oss_file ossf where
+        dif.file_image_id=ossf.id
+        <if test="dataInformation.status!=null and dataInformation.status!=''">
+            and dif.status=#{dataInformation.status}
+        </if>
+        <if test="dataInformation.module!=null and dataInformation.module!=''">
+            and dif.module=#{dataInformation.module}
+        </if>
+        <if test="dataInformation.categoryId!=null and dataInformation.categoryId!=''">
+            and dif.category_id=#{dataInformation.categoryId}
+        </if>
+        <if test="dataInformation.contentType!=null and dataInformation.contentType!=''">
+            and dif.content_type=#{dataInformation.contentType}
+        </if>
+       ORDER BY dif.create_time DESC
+        limit #{start},#{size}
+    </select>
+    <update id="updateStatusByIds">
+        update data_information set status=#{status},reason=#{reason}
+        where id in
+        <foreach collection="asList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

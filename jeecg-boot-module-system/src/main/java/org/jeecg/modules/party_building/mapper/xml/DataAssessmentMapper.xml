@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataAssessmentMapper">
+
+    <select id="assessMentlist" resultType="org.jeecg.modules.party_building.entity.DataAssessment">
+        select  id,assess_Content,score,detail,start_Time,end_Time from data_assessment where issue=1
+    </select>
+    <!--考核状态下的当前考核信息-->
+    <select id="mykaohelist" resultType="org.jeecg.modules.party_building.vo.DataAssessmentVo">
+        select  a.id id,a.assess_Content assess_Content,a.score score,a.detail detail,am.status status,am.self_Score selfScore,a.end_Time endTime,a.start_Time startTime,am.create_Time createTime,am.reason reason from data_assessment a
+					   LEFT JOIN data_assessment_member am
+							   ON a.id=am.assessment_id
+							   <where>
+                                     now() > a.end_Time
+                                   <if test="status!=null">
+                                       and am.status=#{status}
+                                   </if>
+                                   <if test="id!=null">
+                                    and am.assessment_User_Id=#{id}
+                                   </if>
+                                   <if test="assessmentId!=null">
+                                    and a.id=#{assessmentId}
+                                   </if>
+                               </where>
+                               order by am.create_Time desc
+    </select>
+
+    <!--审核-->
+    <update id="updateIds" >
+        update data_assessment set issue=#{issue} where  id=#{id}
+    </update>
+</mapper>

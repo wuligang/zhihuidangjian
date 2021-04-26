@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataActivitySignUpMapper">
+    <select id="pageList" resultType="org.jeecg.modules.party_building.vo.DataActivitysignUpVo">
+        SELECT am.*,a.category_Id categoryId,a.organizer_User_Id organizerUserid,a.description description,a.sign_Up_Start_Time signUpStartTime,a.sign_Up_End_Time signUpEndTime,a.holding_Start_Time holdingStartTime,a.holding_End_Time holdingEndTime,a.place place,a.host_Depart_Id  hostDepartId,a.longitude longitude,a.dimension dimension,a.attendance attendance,a.party_Member partyMember,das.sign_Time signTime,a.between_Time betweenTime,d.depart_Name hostDepartName  FROM data_activity_signUp am
+        LEFT JOIN data_activity a
+        on am.activity_Id=a.id
+        left join data_activity_sign das
+        on am.id=das.actity_Sign_Up_Id
+        left join sys_depart d
+        on a.host_Depart_Id=d.id
+        <where>
+            a.active_Status=2 and a.party_Member like concat('%',am.user_Id,'%')
+            <if test='astime=="1"'>
+                and   a.holding_End_Time >now()
+            </if>
+            <if test="dataActivitysignUp.activityId!=null">
+                and am.activity_Id=#{dataActivitysignUp.activityId}
+            </if>
+            <if test="dataActivitysignUp.userId!=null">
+                and am.user_Id=#{dataActivitysignUp.userId}
+            </if>
+            <if test="dataActivitysignUp.id!=null">
+                and am.id=#{dataActivitysignUp.id}
+            </if>
+            <if test="dataActivitysignUp.activitysignUpStatus!=null">
+                and am.activitysign_Up_Status=#{dataActivitysignUp.activitysignUpStatus}
+            </if>
+            <if test="categoryId!=null">
+                and a.category_Id=#{categoryId}
+            </if>
+            <if test="dataActivitysignUp.name!=null">
+                and am.name like concat ('%',#{dataActivitysignUp.name},'%')
+            </if>
+        </where>
+        <if test='dataActivitysignUp.activitysignUpStatus!="2"'>
+            order by a.sign_Up_Start_Time desc
+        </if>
+        <if test='dataActivitysignUp.activitysignUpStatus=="2"'>
+            order by a.holding_Start_Time desc
+        </if>
+    </select>
+    <!--查看历史活动-->
+    <select id="historyhuodong" resultType="org.jeecg.modules.party_building.vo.DataActivitysignUpVo">
+        SELECT am.*,a.category_Id categoryId,a.organizer_User_Id organizerUserid,a.description description,a.sign_Up_Start_Time signUpStartTime,a.sign_Up_End_Time signUpEndTime,a.holding_Start_Time holdingStartTime,a.holding_End_Time holdingEndTime,a.place place,a.host_Depart_Id  hostDepartId,a.longitude longitude,a.dimension dimension FROM data_activity_signUp am
+        LEFT JOIN data_activity a
+        on am.activity_Id=a.id
+        <where>
+            a.active_Status=2 and a.party_Member like concat('%',am.user_Id,'%') and am.activitysign_Up_Status=2
+            <if test="dataActivitysignUp.userId!=null">
+                and am.user_Id=#{dataActivitysignUp.userId}
+            </if>
+            <if test="dataActivitysignUp.id!=null">
+                and am.id=#{dataActivitysignUp.id}
+            </if>
+            and now() > a.holding_end_time
+        </where>
+        order by a.holding_End_Time desc
+    </select>
+
+    <update id="updateIds" >
+        update data_activity_signUp set activitysign_Up_Status=#{activitysignUpStatus},sign_Up_Time=#{signUpTime} where  user_Id=#{userId}
+        and activity_Id=#{activityId}
+    </update>
+    <!--首页展示活动百分比-->
+    <select id="myhuodong" resultType="java.util.Map">
+SELECT sum(case when activitysign_Up_Status=1  then 1 else 0 end) count1,
+sum(case when activitysign_Up_Status=2  then 1 else 0 end) count2,
+sum(case when activitysign_Up_Status=1  then 1 else 0 end)+sum(case when activitysign_Up_Status=2  then 1 else 0 end) count FROM data_activity_signUp
+WHERE activity_Id in (select  id from data_activity where  active_Status=2) and user_Id=#{id}
+    </select>
+    <!--首页展示发起活动的总活动-->
+    <select id="myFaQiHuoDong" resultType="int">
+            SELECT sum(case when active_Status=2  then 1 else 0 end) count from data_activity
+            WHERE organizer_User_Id=#{realName}
+    </select>
+    <!--查看活动是否参与-->
+    <select id="getCanYuHuoDong" resultType="org.jeecg.modules.party_building.entity.DataActivitysignUp">
+    SELECT * from data_activity_signup d
+		WHERE d.activitysign_Up_Status=2 and d.activity_Id=#{id}
+    </select>
+</mapper>

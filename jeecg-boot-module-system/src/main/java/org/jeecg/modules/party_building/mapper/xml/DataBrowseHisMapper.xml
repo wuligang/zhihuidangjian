@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataBrowseHisMapper">
+
+    <select id="selectListBrowseTime" resultType="org.jeecg.modules.party_building.entity.DataBrowseHis">
+        select dbh.*   from data_browse_his dbh
+        where dbh.user_id=#{userId} and Date(browse_time)=#{browseTime}
+        and not exists (select 1  from data_browse_his  where info_id=dbh.info_id and browse_time>dbh.browse_time)
+        group by info_id
+        order by browse_time desc
+    </select>
+    <select id="listPageByDate" resultType="org.jeecg.modules.party_building.entity.DataBrowseHis">
+        select dbh.*   from data_browse_his dbh
+        where Date(browse_time)=#{browseTime} and dbh.user_id=#{userId}
+        and not exists (select 1  from data_browse_his  where info_id=dbh.info_id and browse_time>dbh.browse_time)
+        group by info_id
+        order by browse_time desc
+    </select>
+</mapper>

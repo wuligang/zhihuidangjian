@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.MallExchangeHisMapper">
+
+    <select id="queryExchangeHisList" resultType="org.jeecg.modules.party_building.model.MallExchHisResponseModel">
+        SELECT   t1.*,p.stock,p.is_Delete,p.status FROM mall_exchange_his t1
+        left join mall_product p
+        on t1.product_id=p.id
+        <where>
+            <if test="mallExchHisRequestModel.id!=null and mallExchHisRequestModel.id!=''">
+                 id = #{mallExchHisRequestModel.id}
+            </if>
+            <if test="mallExchHisRequestModel.userId!=null and mallExchHisRequestModel.userId!=''">
+                and user_id = #{mallExchHisRequestModel.userId}
+            </if>
+            <if test="mallExchHisRequestModel.userName!=null and mallExchHisRequestModel.userName!=''">
+                and user_id = (select id from sys_user where username = #{mallExchHisRequestModel.userName})
+            </if>
+            <if test="mallExchHisRequestModel.proId!=null and mallExchHisRequestModel.proId!=''">
+                and product_Id = #{mallExchHisRequestModel.proId}
+            </if>
+            <if test="mallExchHisRequestModel.proTitle!=null and mallExchHisRequestModel.proTitle!=''">
+                and product_id in (select id from mall_product where pro_title like concat('%',#{mallExchHisRequestModel.proTitle},'%'))
+            </if>
+
+        </where>
+        ORDER BY exchange_time DESC
+	</select>
+
+</mapper>

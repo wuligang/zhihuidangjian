@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataAssessmentMemberMapper">
+    <select id="pageList" resultType="org.jeecg.modules.party_building.vo.DataAssessmentMemberVo">
+    SELECT am.*,a.assess_content content,a.score score,a.detail detail,a.start_time startTime,a.end_time endTime,a.create_By FROM data_assessment_member am
+													LEFT JOIN data_assessment a
+													on am.assessment_id=a.id
+		<where>
+             a.not_Assess_Members like concat('%',am.assessment_User_Id,'%') and  a.end_Time >now()
+            <if test="dataAssessmentMember.assessmentUserId!=null">
+            and am.assessment_User_Id=#{dataAssessmentMember.assessmentUserId}
+            </if>
+            <if test="dataAssessmentMember.status!=null">
+            and am.status=#{dataAssessmentMember.status}
+            </if>
+            <if test="dataAssessmentMember.id!=null">
+                and am.id=#{dataAssessmentMember.id}
+            </if>
+        </where>
+        order by a.start_Time desc
+    </select>
+
+    <select id="shenpilist" resultType="org.jeecg.modules.party_building.vo.DataAssessmentMemberVo">
+        SELECT am.*,a.assess_content content,a.score score,a.detail detail,a.start_time startTime,a.end_time
+        endTime,a.create_By,u.realname username,a.assess_Count assessCount,a.not_Assess_Count notAssessCount FROM
+        data_assessment_member am
+        LEFT JOIN data_assessment a
+        on am.assessment_id=a.id
+        left join sys_user u
+        on u.id=am.assessment_User_Id
+        <where>
+            a.issue=1 and a.not_Assess_Members like concat('%',am.assessment_User_Id,'%')
+            <if test="dataAssessmentMember.status=='0'">
+                and am.status!=#{dataAssessmentMember.status}
+            </if>
+            <if test="dataAssessmentMember.status!='0' and dataAssessmentMember.status!=null">
+                and am.status!=#{dataAssessmentMember.status}
+            </if>
+            <if test="dataAssessmentMember.id!=null">
+                and am.id=#{dataAssessmentMember.id}
+            </if>
+            <if test="content!=null">
+                and a.assess_content like concat ('%',#{content},'%')
+            </if>
+        </where>
+        order by am.create_Time desc
+    </select>
+
+</mapper>

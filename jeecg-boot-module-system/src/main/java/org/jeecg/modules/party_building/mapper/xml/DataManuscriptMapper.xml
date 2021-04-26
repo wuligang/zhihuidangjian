@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataManuscriptMapper">
+    <select id="selectPageByCondition" resultType="org.jeecg.modules.party_building.entity.DataManuscript">
+        select * from data_manuscript where (is_delete=0 or is_delete is NULL)
+        <if test="map.manuscriptStatus!=null and map.manuscriptStatus.size>0">
+            and manuscript_status in
+            <foreach collection="map.manuscriptStatus" item="status" open="(" close=")" separator=",">
+                #{status}
+            </foreach>
+        </if>
+        <if test="map.dataManuscript.categoryId!=null">
+          and category_id=#{map.dataManuscript.categoryId}
+        </if>
+        <if test="map.dataManuscript.manuscriptStatus!=null and map.dataManuscript.manuscriptStatus!=''">
+            and manuscript_status=#{map.dataManuscript.manuscriptStatus}
+        </if>
+        <if test="map.queryCondition!=null and map.queryCondition!=''">
+           and (name like CONCAT(CONCAT('%', #{map.queryCondition}),'%') or content like CONCAT(CONCAT('%', #{map.queryCondition}), '%') or author like CONCAT(CONCAT('%',
+            #{map.queryCondition}), '%') or create_time like CONCAT(CONCAT('%',#{map.queryCondition}), '%'))
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="countDataManuscriptAndImagelist" resultType="java.lang.Integer">
+         select count(1) from data_manuscript  dm LEFT JOIN oss_file ossf on dm.file_image_id=ossf.id LEFT JOIN oss_file ossf1 on
+        dm.file_video_id=ossf1.id
+        <where>
+            (dm.is_delete=0 or dm.is_delete is NULL)
+            <if test="dataManuscript.id!=null and dataManuscript.id!=''">
+                and dm.id=#{dataManuscript.id}
+            </if>
+            <if test="manuscriptStatus!=null and manuscriptStatus.size>0">
+                and dm.manuscript_status in
+                <foreach collection="manuscriptStatus" item="status" open="(" close=")" separator=",">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="dataManuscript.author!=null and dataManuscript.author!=''">
+                and dm.author=#{dataManuscript.author}
+            </if>
+            <if test="dataManuscript.categoryId!=null and dataManuscript.categoryId!=''">
+                and dm.category_id=#{dataManuscript.categoryId}
+            </if>
+            <if test="dataManuscript.userId!=null and dataManuscript.userId!=''">
+                and dm.user_id=#{dataManuscript.userId}
+            </if>
+            <if test="queryCondition!=null and queryCondition!=''">
+                and (dm.name like CONCAT(CONCAT('%', #{queryCondition}), '%') or dm.content like CONCAT(CONCAT('%',
+                #{queryCondition}), '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDataManuscriptAndImagelist" resultType="java.util.Map">
+        select dm.*,ossf.url imgUrl ,ossf1.url vedioUrl from data_manuscript dm LEFT JOIN oss_file ossf on dm.file_image_id=ossf.id
+        LEFT JOIN oss_file ossf1 on dm.file_video_id=ossf1.id
+        <where>
+            (dm.is_delete=0 or dm.is_delete is NULL)
+            <if test="dataManuscript.id!=null and dataManuscript.id!=''">
+                and dm.id=#{dataManuscript.id}
+            </if>
+            <if test="manuscriptStatus!=null and manuscriptStatus.size>0">
+                and dm.manuscript_status in
+                <foreach collection="manuscriptStatus" item="status" open="(" close=")" separator=",">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="dataManuscript.author!=null and dataManuscript.author!=''">
+                and dm.author=#{dataManuscript.author}
+            </if>
+            <if test="dataManuscript.categoryId!=null and dataManuscript.categoryId!=''">
+                and dm.category_id=#{dataManuscript.categoryId}
+            </if>
+            <if test="dataManuscript.userId!=null and dataManuscript.userId!=''">
+                and dm.user_id=#{dataManuscript.userId}
+            </if>
+            <if test="queryCondition!=null and queryCondition!=''">
+                and (dm.name like CONCAT(CONCAT('%', #{queryCondition}), '%') or dm.content like CONCAT(CONCAT('%',
+                #{queryCondition}), '%'))
+            </if>
+        </where>
+        ORDER BY dm.create_time DESC
+        limit #{start},#{size}
+    </select>
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataCategoryMapper">
+
+	<update id="updateTreeNodeStatus" parameterType="java.lang.String">
+		update data_category set has_child = #{status} where id = #{id}
+	</update>
+
+	<!--<select id="listByPid" resultType="java.util.Map">-->
+		<!--select id,name,file_id from data_category where pid=#{pid} or name=#{name} order by sort asc-->
+	<!--</select>-->
+
+	<select id="listByPid" resultType="java.util.Map">
+		select id,name,file_id from data_category
+		<where>
+			pid in
+			<foreach collection="pid" item="pidItem" open="(" close=")" separator=",">
+				#{pidItem}
+			</foreach>
+		</where>
+		order by sort asc
+	</select>
+</mapper>

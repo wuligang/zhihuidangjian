@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.IntegralMapper">
+
+    <resultMap id="integral" type="org.jeecg.modules.party_building.entity.Integral">
+        <result column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
+        <result column="total_integral" jdbcType="INTEGER" property="totalIntegral"/>
+        <result column="current_integral" jdbcType="INTEGER" property="currentIntegral"/>
+    </resultMap>
+
+    <select id="getIntegralByUserId" resultMap="integral">
+		SELECT id, user_id, user_name, real_name, total_integral, current_integral FROM integral t where t.user_id = #{userId}
+	</select>
+
+    <update id="updateByUserId">
+        update integral
+        <trim prefix="set" suffixOverrides=",">
+            <if test="ruleNo != 'R998'">
+                total_integral = if((total_integral + #{changeValue,jdbcType=INTEGER})>0,total_integral + #{changeValue,jdbcType=INTEGER},0),
+            </if>
+            current_integral = if((current_integral + #{changeValue,jdbcType=INTEGER})>0,current_integral + #{changeValue,jdbcType=INTEGER},0),
+        </trim>
+        where user_id = #{userId,jdbcType=VARCHAR}
+    </update>
+
+    <sql id="allFields">
+        id, user_id as userId, user_name as userName, real_name as realName, total_integral as totalIntegral, current_integral as currentIntegral, rank, avatar
+    </sql>
+
+    <select id="listSort" resultType="org.jeecg.modules.party_building.entity.IntegralExt">
+		select <include refid="allFields"/> from (SELECT *, (
+        @rowNum1 := @rowNum1 + 1
+        ) AS rank FROM (SELECT *,(@rowNum:=@rowNum+1) AS rank1
+        FROM (select t1.id,t1.user_id,t1.total_integral,t1.current_integral,t2.avatar,t2.username as user_name,t2.realname as real_name from integral t1, sys_user t2 where t1.user_id=t2.id) a,(SELECT(@rowNum:=0)) b ORDER BY total_integral DESC, current_integral DESC) c,(
+        SELECT
+        ( @rowNum1 := 0 )) b) e
+        <where>
+            <if test="integral.userId!=null and integral.userId!=''">
+                and user_id= #{integral.userId}
+            </if>
+            <if test="integral.userName!=null and integral.userName!=''">
+                and user_name like concat('%',#{integral.userName},'%')
+            </if>
+            <if test="integral.realName!=null and integral.realName!=''">
+                and real_name like concat('%',#{integral.realName},'%')
+            </if>
+            <if test="integral.totalIntegral!=null and integral.totalIntegral!=''">
+                and total_integral= #{integral.totalIntegral}
+            </if>
+            <if test="integral.currentIntegral!=null and integral.currentIntegral!=''">
+                and current_integral= #{integral.currentIntegral}
+            </if>
+        </where>
+	</select>
+
+
+    <sql id="allFieldNew">
+        id, user_id as userId, user_name as userName, real_name as realName, total_integral as totalIntegral, current_integral as currentIntegral, rankNew, avatar
+    </sql>
+    <select id="listSortNew" resultType="org.jeecg.modules.party_building.entity.Integral">
+        select <include refid="allFieldNew"/> from (SELECT *, (
+        @rowNum1 := @rowNum1 + 1
+        ) AS rankNew FROM (SELECT *,(@rowNum:=@rowNum+1) AS rank1
+        FROM (select t1.id,t1.user_id,t1.total_integral,t1.current_integral,t2.avatar,t2.username as user_name,t2.realname as real_name from integral t1, sys_user t2 where t1.user_id=t2.id) a,(SELECT(@rowNum:=0)) b ORDER BY total_integral DESC, current_integral DESC) c,(
+        SELECT
+        ( @rowNum1 := 0 )) b) e
+        <where>
+            <if test="integral.userId!=null and integral.userId!=''">
+                and user_id= #{integral.userId}
+            </if>
+            <if test="integral.userName!=null and integral.userName!=''">
+                and user_name like concat('%',#{integral.userName},'%')
+            </if>
+            <if test="integral.realName!=null and integral.realName!=''">
+                and real_name like concat('%',#{integral.realName},'%')
+            </if>
+            <if test="integral.totalIntegral!=null and integral.totalIntegral!=''">
+                and total_integral= #{integral.totalIntegral}
+            </if>
+            <if test="integral.currentIntegral!=null and integral.currentIntegral!=''">
+                and current_integral= #{integral.currentIntegral}
+            </if>
+        </where>
+    </select>
+
+</mapper>

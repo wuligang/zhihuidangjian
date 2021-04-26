@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.PhotographsMapper">
+    <select id="pagelistFileList" resultType="java.util.Map">
+        SELECT	* FROM data_photographs p
+	     LEFT JOIN oss_file o ON p.oss_Id = o.id
+	     <where>
+             <if test="softType!=null and ''!=softType">
+                 and p.soft_type=#{softType}
+             </if>
+         </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.party_building.mapper.DataSmallClassMapper">
+<select id="querySmallClassByCategoryId" resultType="org.jeecg.modules.party_building.entity.DataSmallClass">
+    SELECT * from data_small_class where category_id=#{categoryId} and class_states=#{classStates} order by create_time desc;
+</select>
+    <select id="getSmallClassByMap" resultType="java.util.Map">
+        select dsc.*,dif.file_url from data_small_class dsc,data_information_file dif where dsc.id=dif.related_id and
+        dif.category_pid=0 and dif.category_belong=#{categoryBelong}
+        <if test="id!=null and id!=''">
+            and dsc.id=#{id}
+        </if>
+    </select>
+
+    <select id="selectSmallClassAppPageByCondition" resultType="java.util.Map">
+        select dsc.*,dif.file_url from data_small_class dsc,data_information_file dif where dsc.id=dif.related_id and
+        dif.category_pid=0
+        <if test="dataSmallClass.id!=null and dataSmallClass.id!=''">
+        and dsc.id=#{dataSmallClass.id}
+        </if>
+        <if test="dataSmallClass.categoryId!=null and dataSmallClass.categoryId!=''">
+            and dsc.category_id=#{dataSmallClass.categoryId}
+        </if>
+        <if test="dataSmallClass.classStates!=null and dataSmallClass.classStates!=''">
+            and dsc.class_states=#{dataSmallClass.classStates}
+        </if>
+        <if test="categoryBelong!=null and categoryBelong!=''">
+            and dif.category_belong=#{categoryBelong}
+        </if>
+        order By dsc.create_time desc
+        limit #{start},#{size}
+
+    </select>
+
+    <select id="countSmallClassAppPageByCondition" resultType="java.lang.Integer">
+        select count(1) from data_small_class dsc,data_information_file dif where dsc.id=dif.related_id and
+        dif.category_pid=0
+        <if test="dataSmallClass.id!=null and dataSmallClass.id!=''">
+            and dsc.id=#{dataSmallClass.id}
+        </if>
+        <if test="dataSmallClass.categoryId!=null and dataSmallClass.categoryId!=''">
+            and dsc.category_id=#{dataSmallClass.categoryId}
+        </if>
+        <if test="dataSmallClass.classStates!=null and dataSmallClass.classStates!=''">
+            and dsc.class_states=#{dataSmallClass.classStates}
+        </if>
+        <if test="categoryBelong!=null and categoryBelong!=''">
+            and dif.category_belong=#{categoryBelong}
+        </if>
+
+    </select>
+</mapper>
