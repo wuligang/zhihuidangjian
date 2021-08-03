@@ -6,11 +6,11 @@
   #  key-store-password: 123456
   #  key-store-type: JKS
 server:
-  port: 8084
+  port: 8088
   tomcat:
     max-swallow-size: -1
   servlet:
-    context-path: /jeecg-boot
+    context-path: /party_building
   compression:
     enabled: true
     min-response-size: 1024
