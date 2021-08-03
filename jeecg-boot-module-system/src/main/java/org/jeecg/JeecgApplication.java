@@ -27,7 +27,7 @@ public class JeecgApplication {
     String port = env.getProperty("server.port");
     String path = env.getProperty("server.servlet.context-path");
     log.info("\n----------------------------------------------------------\n\t" +
-        "Application Jeecg-Boot is running! Access URLs:\n\t" +
+        "Application party_building is running! Access URLs:\n\t" +
         "Local: \t\thttp://localhost:" + port + path + "/\n\t" +
         "External: \thttp://" + ip + ":" + port + path + "/\n\t" +
         "Swagger-UI: \t\thttp://" + ip + ":" + port + path + "/doc.html\n" +

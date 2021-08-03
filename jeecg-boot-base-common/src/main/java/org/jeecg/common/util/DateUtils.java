@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 /**
  * 类描述：时间操作定义类
  *
- * @Author: 张代浩
+ * @Author:
  * @Date:2012-12-8 12:15:03
  * @Version 1.0
  */

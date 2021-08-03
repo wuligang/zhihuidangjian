@@ -10,7 +10,7 @@ import org.jeecgframework.codegenerate.generate.pojo.onetomany.SubTableVo;
 /**
  * 代码生成器入口【一对多】
  * 【 GUI模式已弃用，请转移Online模式进行代码生成 】
- * @Author 张代浩
+ * @Author
  * @site www.jeecg.org
  * 
  */
